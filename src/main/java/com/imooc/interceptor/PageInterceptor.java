@@ -6,6 +6,7 @@ import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
@@ -18,18 +19,26 @@ import java.util.Properties;
 /**
  * 分页拦截器
  */
-@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class})})
+@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class PageInterceptor implements Interceptor {
 
     private String test;
 
+    /**
+     * 第三步:执行拦截的逻辑
+     *
+     * @param invocation
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
-        MetaObject metaObject = MetaObject.forObject(statementHandler, SystemMetaObject.DEFAULT_OBJECT_FACTORY, SystemMetaObject.DEFAULT_OBJECT_WRAPPER_FACTORY, null);
+        MetaObject metaObject = MetaObject.forObject(statementHandler, SystemMetaObject.DEFAULT_OBJECT_FACTORY, SystemMetaObject.DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
         MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
         // 配置文件中SQL语句的ID
         String id = mappedStatement.getId();
+        //sql的id是以ByPage结尾
         if (id.matches(".+ByPage$")) {
             BoundSql boundSql = statementHandler.getBoundSql();
             // 原始的SQL语句
@@ -54,12 +63,23 @@ public class PageInterceptor implements Interceptor {
         return invocation.proceed();
     }
 
+    /**
+     * 第二步:过滤拦截的对象
+     *
+     * @param target
+     * @return
+     */
     @Override
     public Object plugin(Object target) {
         System.out.println(this.test);
         return Plugin.wrap(target, this);
     }
 
+    /**
+     * 第一步:获取配置文件的值
+     *
+     * @param properties
+     */
     @Override
     public void setProperties(Properties properties) {
         this.test = properties.getProperty("test");

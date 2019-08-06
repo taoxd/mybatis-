@@ -2,3 +2,4 @@
 logging:
   level:
     com.imooc.dao: trace
+
