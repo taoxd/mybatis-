@@ -1,12 +1,14 @@
 package com.imooc.dao;
 
-import com.imooc.bean.Message;
-import com.imooc.db.DBAccess;
-import org.apache.ibatis.session.SqlSession;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.imooc.bean.Message;
+import com.imooc.db.DBAccess;
 
 /**
  * 和message表相关的数据库操作
@@ -16,31 +18,66 @@ public class MessageDao {
     /**
      * 根据查询条件查询消息列表
      */
-    public List<Message> queryMessageList(String command, String description) {
+    public List<Message> queryMessageList(Map<String,Object> parameter) {
         DBAccess dbAccess = new DBAccess();
         List<Message> messageList = new ArrayList<Message>();
         SqlSession sqlSession = null;
         try {
             sqlSession = dbAccess.getSqlSession();
-            Message message = new Message();
-            message.setCommand(command);
-            message.setDescription(description);
-            /*
-            namespace: Message都是手写，有可能会不一致
-            与sql关联的id: queryMessageList都是手写，有可能出错
-            传入的参数: 因为List<E> selectList(String var1, Object var2);入参是Object，传啥都不会报错
-            返回值: 返回值都是泛型
-             */
             // 通过sqlSession执行SQL语句
-            //messageList = sqlSession.selectList("Message.queryMessageList", message);
-            //接口式编程
             IMessage imessage = sqlSession.getMapper(IMessage.class);
-            messageList = imessage.queryMessageList(message);
+            messageList = imessage.queryMessageList(parameter);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-            if (sqlSession != null) {
+            if(sqlSession != null) {
+                sqlSession.close();
+            }
+        }
+        return messageList;
+    }
+
+    /**
+     * 根据查询条件查询消息列表的条数
+     */
+    public int count(Message message) {
+        DBAccess dbAccess = new DBAccess();
+        SqlSession sqlSession = null;
+        int result = 0;
+        try {
+            sqlSession = dbAccess.getSqlSession();
+            // 通过sqlSession执行SQL语句
+            IMessage imessage = sqlSession.getMapper(IMessage.class);
+            result = imessage.count(message);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if(sqlSession != null) {
+                sqlSession.close();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 根据查询条件分页查询消息列表
+     */
+    public List<Message> queryMessageListByPage(Map<String,Object> parameter) {
+        DBAccess dbAccess = new DBAccess();
+        List<Message> messageList = new ArrayList<Message>();
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = dbAccess.getSqlSession();
+            // 通过sqlSession执行SQL语句
+            IMessage imessage = sqlSession.getMapper(IMessage.class);
+            messageList = imessage.queryMessageListByPage(parameter);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if(sqlSession != null) {
                 sqlSession.close();
             }
         }
@@ -62,7 +99,7 @@ public class MessageDao {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-            if (sqlSession != null) {
+            if(sqlSession != null) {
                 sqlSession.close();
             }
         }
@@ -83,7 +120,7 @@ public class MessageDao {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-            if (sqlSession != null) {
+            if(sqlSession != null) {
                 sqlSession.close();
             }
         }
