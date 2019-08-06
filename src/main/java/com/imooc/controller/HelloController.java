@@ -26,7 +26,7 @@ public class HelloController {
         } else {
             page.setPageNo(Integer.valueOf(pageNo));
         }
-        return listService.queryMessageList(command, description, page);
+        return listService.queryMessageListByPage(command, description, page);
     }
 
 

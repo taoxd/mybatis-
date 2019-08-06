@@ -30,7 +30,7 @@ public class QueryService {
     }
 
     /**
-     * 根据查询条件分页查询消息列表
+     * 根据查询条件分页查询消息列表(拦截器分页)
      */
     public List<Message> queryMessageListByPage(String command, String description, Page page) {
         Map<String, Object> parameter = new HashMap<String, Object>();

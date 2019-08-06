@@ -1,0 +1,4 @@
+#打印sql
+logging:
+  level:
+    com.imooc.dao: trace
